@@ -37,6 +37,22 @@ const deleteUserFromDB = inngest.createFunction(
   },
 );
 
+//for updating user when clerk/user.updated event is triggered, we can create another function
 
+const updateUserInDB = inngest.createFunction(
+  { id: "update-user-in-db" },
+  { event: "clerk/user.updated" },
+  async ({ event }) => {
+    await connectDB();
+    const { id, email_addresses, first_name, last_name, image_url } =
+      event.data;
+    const updatedUser = {
+      email: email_addresses[0]?.email_address,
+      name: `${first_name || ""} ${last_name || ""}` || "User",
+      imageUrl: image_url,
+    };
+    await User.findOneAndUpdate({ clerkId: id }, updatedUser, { new: true }); //{new:true} option is used to return the updated document instead of the old one
+  },
+);
 
-export const functions = [syncUser, deleteUserFromDB];
+export const functions = [syncUser, deleteUserFromDB, updateUserInDB];
