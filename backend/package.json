@@ -16,6 +16,7 @@
     "cloudinary": "^2.9.0",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+    "inngest": "^3.52.3",
     "mongoose": "^9.2.1"
   }
 }
