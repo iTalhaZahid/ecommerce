@@ -25,4 +25,18 @@ const syncUser = inngest.createFunction(
   },
 );
 
-export const functions = [syncUser];
+// delete user when clerk/user.deleted event is triggered
+
+const deleteUserFromDB = inngest.createFunction(
+  { id: "delete-user-from-db" },
+  { event: "clerk/user.deleted" },
+  async ({ event }) => {
+    await connectDB();
+    const { id } = event.data;
+    await User.findOneAndDelete({ clerkId: id });
+  },
+);
+
+
+
+export const functions = [syncUser, deleteUserFromDB];
