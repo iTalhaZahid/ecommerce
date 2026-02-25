@@ -13,4 +13,6 @@ export const ENV={
     // Clerk credentials
     CLERK_PUBLISHABLE_KEY:process.env.CLERK_PUBLISHABLE_KEY,
     CLERK_SECRET_KEY:process.env.CLERK_SECRET_KEY,
+    // Inngest signing key
+    INNGEST_SIGNING_KEY:process.env.INNGEST_SIGNING_KEY
 }
