@@ -12,7 +12,7 @@ const __dirname = path.resolve();
 
 app.use(express.json());  // Middleware to parse JSON request bodies also needed for parsing incoming events from inngest, as they are sent as JSON payloads
 app.use(clerkMiddleware()); // Clerk middleware to handle authentication
-app.use("api/inngest", serve({ client: inngest ,functions})); // Use the Inngest middleware to handle incoming events at the /api/inngest endpoint
+app.use("/api/inngest", serve({ client: inngest ,functions})); // Use the Inngest middleware to handle incoming events at the /api/inngest endpoint
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "OK!" });
