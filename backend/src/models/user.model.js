@@ -36,6 +36,12 @@ const addressSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema(
   {
+    clerkId: {
+      type: String,
+      required: true,
+      unique: true,
+      index: true,    // Creates an index on the clerkId field for faster queries
+    },
     email: {
       type: String,
       required: true,
@@ -47,8 +53,6 @@ const userSchema = new mongoose.Schema(
     },
     imageUrl: {
       type: String,
-      unique: true,
-      required: true,
     },
     addresses: [addressSchema], //array of address
     wishlist: [
