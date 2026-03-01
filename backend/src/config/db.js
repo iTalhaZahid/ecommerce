@@ -28,6 +28,11 @@ export const connectDB = async () => {
   } catch (error) {
     cached.promise = null;
     console.error(`Error connecting to MongoDB: ${error.message}`);
-    process.exit(1);
+
+    if (error.name === "MongoNetworkError") {
+      throw new Error("Database temporarily unavailable");
+    }
+
+    throw error;
   }
 };
