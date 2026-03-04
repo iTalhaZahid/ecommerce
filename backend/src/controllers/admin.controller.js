@@ -162,3 +162,44 @@ export async function updateOrderStatus(req, res) {
   }
 }
 
+export async function getAllCustomers(_, res) {
+  try {
+    const customers = await User.find().sort({ createdAt: -1 }); // Sort customers by creation date (newest first)
+    res.status(200).json({ customers });
+  } catch (error) {
+    console.error("Error fetching customers:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error while fetching customers" });
+  }
+}
+
+export async function getDashboardStats(_, res) {
+  try {
+    const totalOrders = await Order.countDocuments();
+    const revenueResult = await Order.aggregate([
+      {
+        $group: {
+          _id: null,
+          total: { $sum: "$totalPrice" },
+        },
+      },
+    ]);
+    const totalRevenue = revenueResult[0]?.total || 0;
+    const totalCustomers = await User.countDocuments();
+    const totalProducts = await Product.countDocuments();
+    res.status(200).json({
+      totalOrders,
+      totalRevenue,
+      totalCustomers,
+      totalProducts,
+    });
+  } catch (error) {
+    console.error("Error fetching dashboard stats:", error);
+    res
+      .status(500)
+      .json({
+        message: "Internal Server Error while fetching dashboard stats",
+      });
+  }
+}
