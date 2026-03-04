@@ -1,5 +1,7 @@
 import cloudinary from "../config/cloudinary.js";
 import { Product } from "../models/product.model.js";
+import { Order } from "../models/order.model.js";
+import { User } from "../models/user.model.js";
 
 export async function createProduct(req, res) {
   try {
@@ -108,3 +110,55 @@ export async function updateProduct(req, res) {
       .json({ message: "Internal Server Error while updating product" });
   }
 }
+
+export async function getAllOrders(_, res) {
+  try {
+    const orders = await Order.find()
+      .populate("user", "name email")
+      .populate("orderItems.product")
+      .sort({ createdAt: -1 }); // Sort orders by creation date (newest first)
+  } catch (error) {
+    console.error("Error fetching orders:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error while fetching orders" });
+  }
+}
+
+export async function updateOrderStatus(req, res) {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (!["pending", "shipped", "delivered"].includes(status)) {
+      return res.status(400).json({ message: "Invalid status value" });
+    }
+
+    const order = await Order.findById(id);
+    if (!order) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    order.status = status;
+
+    if (status === "shipped" && !order.shippedAt) {
+      order.shippedAt = new Date();
+    }
+
+    if (status === "delivered" && !order.deliveredAt) {
+      order.deliveredAt = new Date();
+    }
+
+    await order.save();
+
+    res
+      .status(200)
+      .json({ message: "Order status updated successfully", order });
+  } catch (error) {
+    console.error("Error updating order status:", error);
+    res
+      .status(500)
+      .json({ message: "Internal Server Error while updating order status" });
+  }
+}
+
