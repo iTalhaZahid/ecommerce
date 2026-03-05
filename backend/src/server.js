@@ -6,6 +6,7 @@ import { connectDB } from "./config/db.js";
 import { serve } from "inngest/express"; //inngest express middleware to handle incoming events from inngest
 import { functions, inngest } from "./config/inngest.js";
 import adminRoutes from "./routes/admin.route.js";
+import userRoutes from "./routes/user.route.js";
 
 
 const app = express();
@@ -17,6 +18,7 @@ app.use(clerkMiddleware()); // Clerk middleware to handle authentication
 app.use("/api/inngest", serve({ client: inngest, functions })); // Use the Inngest middleware to handle incoming events at the /api/inngest endpoint
 // Custom Routes
 app.use("/api/admin",adminRoutes)
+app.use("/api/users",userRoutes)
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "OK!" });
