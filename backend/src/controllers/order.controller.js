@@ -4,39 +4,61 @@ import { Review } from "../models/review.model.js";
 
 export async function createOrder(req, res) {
   try {
+    const session = await Product.startSession(); // Start a Mongoose session for transaction
+    session.startTransaction();
+
     const user = req.user;
     const { orderItems, shippingAddress, paymentResult, totalPrice } = req.body;
     if (!orderItems || orderItems.length === 0) {
+      await session.abortTransaction(); // Abort the transaction if validation fails
+      session.endSession(); // End the session
       return res.status(400).json({ message: "No order items provided" });
     }
     //validate product and stock
     for (const item of orderItems) {
-      const product = await Product.findById(item._id);
+      const product = await Product.findById(item.product._id).session(session); // Use the session for the query
       if (!product) {
+        await session.abortTransaction();
+        session.endSession();
         return res
           .status(404)
           .json({ message: `Product not found: ${item._id}` });
       }
       if (product.stock < item.quantity) {
+        await session.abortTransaction();
+        session.endSession();
         return res
           .status(400)
           .json({ message: `Insufficient stock for product: ${item._id}` });
       }
 
-      const order = await Order.create({
-        user: user._id,
-        clerkId: user.clerkId,
-        orderItems,
-        shippingAddress,
-        paymentResult,
-        totalPrice,
-      });
+      const order = await Order.create(
+        [
+          {
+            user: user._id,
+            clerkId: user.clerkId,
+            orderItems,
+            shippingAddress,
+            paymentResult,
+            totalPrice,
+          },
+        ],
+        { session },
+      ); // Create the order within the transaction
+
       //reduce stock
       for (const item of orderItems) {
-        await Product.findByIdAndUpdate(item.product._id, {
-          $inc: { stock: -item.quantity },
-        });
+        await Product.findByIdAndUpdate(
+          item.product._id,
+          {
+            $inc: { stock: -item.quantity },
+          },
+          { session },
+        ); // Use the session for the update
       }
+
+      await session.commitTransaction(); // Commit the transaction
+      session.endSession(); // End the session
 
       res.status(201).json({
         message: "Order created successfully",
@@ -44,6 +66,9 @@ export async function createOrder(req, res) {
       });
     }
   } catch (error) {
+    console.log("Error in Creating Order", error);
+    await session.abortTransaction();
+    session.endSession();
     res.status(500).json({ message: "Internal server error", error });
   }
 }
@@ -71,6 +96,7 @@ export async function getUserOrders(req, res) {
       data: ordersWithReviewStatus,
     });
   } catch (error) {
+    console.log("Error getting orders:", error);
     res.status(500).json({ message: "Internal server error", error });
   }
 }
