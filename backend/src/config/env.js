@@ -17,4 +17,6 @@ export const ENV = {
   INNGEST_SIGNING_KEY: process.env.INNGEST_SIGNING_KEY,
   // Admin email
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
+  // Client URL for CORS
+  CLIENT_URL: process.env.CLIENT_URL,
 };
