@@ -3,19 +3,23 @@ import path from "path";
 import { ENV } from "./config/env.js";
 import { clerkMiddleware } from "@clerk/express";
 import { connectDB } from "./config/db.js";
+import cors from "cors";
 import { serve } from "inngest/express"; //inngest express middleware to handle incoming events from inngest
 import { functions, inngest } from "./config/inngest.js";
+
 import adminRoutes from "./routes/admin.route.js";
 import userRoutes from "./routes/user.route.js";
 import orderRoutes from "./routes/order.route.js";
 import reviewRoutes from "./routes/review.route.js";
 import productRoutes from "./routes/product.route.js";
+import cartRoutes from "./routes/cart.route.js";
 
 const app = express();
 
 const __dirname = path.resolve();
 
 app.use(express.json()); // Middleware to parse JSON request bodies also needed for parsing incoming events from inngest, as they are sent as JSON payloads
+app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); // Enable CORS for all routes and allow credentials (cookies) to be sent from the client application
 app.use(clerkMiddleware()); // Clerk middleware to handle authentication
 app.use("/api/inngest", serve({ client: inngest, functions })); // Use the Inngest middleware to handle incoming events at the /api/inngest endpoint
 // Custom Routes
@@ -24,6 +28,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/products", productRoutes);
+app.use("/api/cart", cartRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "OK!" });
