@@ -3,8 +3,8 @@ import { Product } from "../models/product.model.js";
 
 export async function getCart(req, res) {
   try {
-    let cart = await Cart.findOne({ user: req.user.id }).populate(
-      "items.product",
+    let cart = await Cart.findOne({ clerkId: req.user.clerkId }).populate(
+      "items.product"
     );
     if (!cart) {
       const user = req.user;
@@ -41,21 +41,24 @@ export async function addToCart(req, res) {
       });
     }
     //check if product already in cart
-    const existingItemIndex = cart.items.find(
+    const existingItem = cart.items.find(
       (item) => item.product.toString() === productId,
     );
-    if (existingItemIndex) {
-      const newQuantity = existingItemIndex.quantity + 1;
+    if (existingItem) {
+      const newQuantity = existingItem.quantity + 1;
       if (product.stock < newQuantity) {
         return res.status(400).json({ message: "Insufficient stock" });
       }
-      existingItemIndex.quantity = newQuantity;
+      existingItem.quantity = newQuantity;
     } else {
       cart.items.push({ product: productId, quantity });
     }
     await cart.save();
     res.status(200).json({ message: "Product added to cart", data: cart });
-  } catch (error) {}
+  } catch (error) {
+    console.error("Error adding product to cart:", error);
+    res.status(500).json({ message: "Server error" });
+  }
 }
 
 export async function updateCartItem(req, res) {
