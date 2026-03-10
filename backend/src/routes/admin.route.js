@@ -20,7 +20,7 @@ router.get("/products", getAllProducts);
 router.put("/products/:id", upload.array("images", 3), updateProduct);
 
 router.get("/customers", getAllCustomers);
-router.patch("/orders/:id/status", updateOrderStatus);
+router.patch("/orders/:orderId/status", updateOrderStatus);
 
 router.get("/orders", getAllOrders);
 router.get("/stats", getDashboardStats);

@@ -117,6 +117,7 @@ export async function getAllOrders(_, res) {
       .populate("user", "name email")
       .populate("orderItems.product")
       .sort({ createdAt: -1 }); // Sort orders by creation date (newest first)
+    res.status(200).json({ orders });
   } catch (error) {
     console.error("Error fetching orders:", error);
     res
@@ -127,14 +128,14 @@ export async function getAllOrders(_, res) {
 
 export async function updateOrderStatus(req, res) {
   try {
-    const { id } = req.params;
+    const { orderId } = req.params;
     const { status } = req.body;
 
     if (!["pending", "shipped", "delivered"].includes(status)) {
       return res.status(400).json({ message: "Invalid status value" });
     }
 
-    const order = await Order.findById(id);
+    const order = await Order.findById(orderId);
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
