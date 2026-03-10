@@ -3,6 +3,7 @@ import {
   createProduct,
   getAllProducts,
   updateProduct,
+  deleteProduct,
   getAllCustomers,
   updateOrderStatus,
   getAllOrders,
@@ -18,6 +19,7 @@ router.use(protectRoute, adminOnly); // Apply protectRoute and adminOnly middlew
 router.post("/products", upload.array("images", 3), createProduct); // Use multer middleware to handle file uploads, allowing up to 3 images per product
 router.get("/products", getAllProducts);
 router.put("/products/:id", upload.array("images", 3), updateProduct);
+router.delete("/products/:id", deleteProduct);
 
 router.get("/customers", getAllCustomers);
 router.patch("/orders/:orderId/status", updateOrderStatus);
