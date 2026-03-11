@@ -114,12 +114,24 @@ export async function updateProduct(req, res) {
 export async function deleteProduct(req, res) {
   try {
     const { id } = req.params;
-    const deletedProduct = await Product.findByIdAndDelete(id);
+    const product = await Product.findById(id);
 
-    if (!deletedProduct) {
+    if (!product) {
       return res.status(404).json({ message: "Product not found" });
     }
 
+    //Delete images from Cloudinary
+    if (product.images && product.images.length > 0) {
+      const deletePromises = product.images.map((imageUrl) => {
+        const parts = imageUrl.split("/");
+        const fileName = parts[parts.length - 1];
+        const publicId = "products/" + fileName.split(".")[0];
+
+        return cloudinary.uploader.destroy(publicId);
+      });
+      await Promise.all(deletePromises.filter(Boolean));
+    }
+    await Product.findByIdAndDelete(id);
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.error("Error deleting product:", error);
@@ -215,10 +227,8 @@ export async function getDashboardStats(_, res) {
     });
   } catch (error) {
     console.error("Error fetching dashboard stats:", error);
-    res
-      .status(500)
-      .json({
-        message: "Internal Server Error while fetching dashboard stats",
-      });
+    res.status(500).json({
+      message: "Internal Server Error while fetching dashboard stats",
+    });
   }
 }
