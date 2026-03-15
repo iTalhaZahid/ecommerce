@@ -6,6 +6,7 @@ import {
   QueryClientProvider,
 } from '@tanstack/react-query'
 import "../global.css";
+import { StatusBar } from 'react-native';
 export default function RootLayout() {
   const queryClient = new QueryClient()
   const publishableKey = process.env.EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY!
@@ -18,6 +19,7 @@ export default function RootLayout() {
     <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
       <QueryClientProvider client={queryClient}>
         <Stack screenOptions={{ headerShown: false }} />
+        <StatusBar/>
       </QueryClientProvider>
     </ClerkProvider >
   )
