@@ -19,4 +19,7 @@ export const ENV = {
   ADMIN_EMAIL: process.env.ADMIN_EMAIL,
   // Client URL for CORS
   CLIENT_URL: process.env.CLIENT_URL,
+  // Stripe
+  STRIPE_PUBLISHABLE_KEY:process.env.STRIPE_PUBLISHABLE_KEY,
+  STRIPE_SECRET_KEY:process.env.STRIPE_SECRET_KEY,
 };
