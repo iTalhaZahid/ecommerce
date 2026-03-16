@@ -19,6 +19,21 @@ const app = express();
 
 const __dirname = path.resolve();
 
+// special handling: Stripe webhook needs raw body BEFORE any body parsing middleware
+// apply raw body parser conditionally only to webhook endpoint
+app.use(
+  "/api/payment",
+  (req, res, next) => {
+    if (req.originalUrl === "/api/payment/webhook") {
+      express.raw({ type: "application/json" })(req, res, next);
+    } else {
+      express.json()(req, res, next); // parse json for non-webhook routes
+    }
+  },
+  paymentRoutes
+);
+
+
 app.use(express.json()); // Middleware to parse JSON request bodies also needed for parsing incoming events from inngest, as they are sent as JSON payloads
 app.use(cors({ origin: ENV.CLIENT_URL, credentials: true })); // Enable CORS for all routes and allow credentials (cookies) to be sent from the client application
 app.use(clerkMiddleware()); // Clerk middleware to handle authentication
@@ -30,7 +45,6 @@ app.use("/api/orders", orderRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/cart", cartRoutes);
-app.use("/api/payment", paymentRoutes);
 
 app.get("/api/health", (req, res) => {
   res.status(200).json({ message: "OK!" });
